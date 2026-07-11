@@ -97,7 +97,7 @@ with st.sidebar:
             horoscope_content = stringio.read()
             st.session_state.horoscope_data = horoscope_content
             st.session_state.file_uploaded = True
-            st.success("✅ ஜாதக ஃபைல் சுமாரான வகையில் அப்லோட் ஆனது")
+            st.success("✅ ஜாதக ஃபைல் சுமாரான வகை���ில் அப்லோட் ஆனது")
         except Exception as e:
             st.error(f"❌ ஃபைல் படிப்பு பிழை: {str(e)}")
             st.session_state.file_uploaded = False
@@ -188,6 +188,8 @@ if user_input:
             st.markdown(user_input)
     
     # Generate AI response
+    status_container = st.container()
+    
     try:
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
@@ -206,105 +208,94 @@ if user_input:
         
         assistant_response = None
         model_used = None
-        error_log = []
+        groq_error_details = None
         
-        # Try Groq first - Use CURRENT available models
+        # Try Groq first
         if st.session_state.groq_api_key:
-            st.info("⚡ Groq ஐ முயற்சி செய்கிறது...", icon="⏳")
+            with status_container:
+                st.info("⚡ Groq ஐ முயற்சி செய்கிறது...", icon="⏳")
             
-            try:
-                groq_client = Groq(api_key=st.session_state.groq_api_key)
-                
-                # Updated Groq models (as of 2024)
-                groq_models = [
-                    "deepseek-r1-distill-llama-70b",
-                    "llama-3.3-70b-versatile",
-                    "mixtral-8x7b-32768",
-                    "llama-3.1-70b-versatile",
-                    "llama-3.1-8b-instant"
-                ]
-                
-                for groq_model in groq_models:
-                    try:
+            groq_models = [
+                "deepseek-r1-distill-llama-70b",
+                "llama-3.3-70b-versatile",
+                "mixtral-8x7b-32768",
+                "llama-3.1-70b-versatile",
+                "llama-3.1-8b-instant"
+            ]
+            
+            for groq_model in groq_models:
+                try:
+                    with status_container:
                         st.info(f"📡 Groq model: {groq_model}", icon="⏳")
-                        
-                        chat_completion = groq_client.chat.completions.create(
-                            messages=[
-                                {
-                                    "role": "system",
-                                    "content": SYSTEM_PROMPT
-                                },
-                                {
-                                    "role": "user",
-                                    "content": context
-                                }
-                            ],
-                            model=groq_model,
-                            max_tokens=1024,
-                            temperature=0.7,
-                        )
-                        
-                        assistant_response = chat_completion.choices[0].message.content
-                        model_used = f"Groq ({groq_model})"
-                        st.session_state.model_used = model_used
-                        
+                    
+                    groq_client = Groq(api_key=st.session_state.groq_api_key)
+                    
+                    chat_completion = groq_client.chat.completions.create(
+                        messages=[
+                            {
+                                "role": "system",
+                                "content": SYSTEM_PROMPT
+                            },
+                            {
+                                "role": "user",
+                                "content": context
+                            }
+                        ],
+                        model=groq_model,
+                        max_tokens=1024,
+                        temperature=0.7,
+                    )
+                    
+                    assistant_response = chat_completion.choices[0].message.content
+                    model_used = f"Groq ({groq_model})"
+                    st.session_state.model_used = model_used
+                    
+                    with status_container:
                         st.success(f"✅ {model_used} பயன்படுத்தி பதிலளிக்கப்பட்டது")
-                        break
-                        
-                    except Exception as model_error:
-                        error_msg = f"❌ {groq_model}: {str(model_error)[:100]}"
-                        error_log.append(error_msg)
-                        continue
-                
-            except Exception as groq_error:
-                error_msg = f"❌ Groq பிழை: {str(groq_error)[:150]}"
-                error_log.append(error_msg)
-                st.warning(error_msg)
+                    break
+                    
+                except Exception as model_error:
+                    groq_error_details = str(model_error)
+                    continue
         
         # Fallback to Gemini if Groq failed or not provided
         if not assistant_response and st.session_state.gemini_api_key:
-            st.info("🔐 Gemini ஐ முயற்சி செய்கிறது...", icon="⏳")
+            with status_container:
+                st.info("🔐 Gemini ஐ முயற்சி செய்கிறது...", icon="⏳")
             
-            try:
-                genai.configure(api_key=st.session_state.gemini_api_key)
-                
-                models_to_try = [
-                    "gemini-1.5-flash",
-                    "gemini-1.5-flash-latest",
-                    "gemini-pro",
-                    "gemini-1.0-pro"
-                ]
-                
-                for model_name in models_to_try:
-                    try:
+            models_to_try = [
+                "gemini-1.5-flash",
+                "gemini-1.5-flash-latest",
+                "gemini-pro",
+                "gemini-1.0-pro"
+            ]
+            
+            for model_name in models_to_try:
+                try:
+                    with status_container:
                         st.info(f"📡 Gemini model: {model_name}", icon="⏳")
-                        
-                        model = genai.GenerativeModel(model_name)
-                        
-                        response = model.generate_content(
-                            full_prompt,
-                            generation_config=genai.types.GenerationConfig(
-                                max_output_tokens=1024,
-                                temperature=0.7,
-                            )
+                    
+                    genai.configure(api_key=st.session_state.gemini_api_key)
+                    model = genai.GenerativeModel(model_name)
+                    
+                    response = model.generate_content(
+                        full_prompt,
+                        generation_config=genai.types.GenerationConfig(
+                            max_output_tokens=1024,
+                            temperature=0.7,
                         )
-                        
-                        assistant_response = response.text
-                        model_used = f"Gemini ({model_name})"
-                        st.session_state.model_used = model_used
-                        
+                    )
+                    
+                    assistant_response = response.text
+                    model_used = f"Gemini ({model_name})"
+                    st.session_state.model_used = model_used
+                    
+                    with status_container:
                         st.success(f"✅ {model_used} பயன்படுத்தி பதிலளிக்கப்பட்டது")
-                        break
-                        
-                    except Exception as model_error:
-                        error_msg = f"❌ {model_name}: {str(model_error)[:100]}"
-                        error_log.append(error_msg)
-                        continue
-                        
-            except Exception as gemini_error:
-                error_msg = f"❌ Gemini பிழை: {str(gemini_error)[:150]}"
-                error_log.append(error_msg)
-                st.warning(error_msg)
+                    break
+                    
+                except Exception:
+                    continue
         
         # If we got a response, display it
         if assistant_response:
@@ -321,7 +312,19 @@ if user_input:
         
         # If no response from either API
         else:
-            error_message = "❌ **பிழை**: எந்த API யும் பதிலளிக்கவில்லை.\n\n**தீர்வு:**\n1) API Keys சரியாக உள்ளதா சரிபார்க்கவும்\n2) Groq: https://console.groq.com\n3) Gemini: https://ai.google.dev"
+            error_message = f"""❌ **பிழை**: எந்த API யும் பதிலளிக்கவில்லை.
+
+**Groq பிழை**: {groq_error_details[:200] if groq_error_details else 'Unknown'}
+
+**தீர்வு:**
+1. **Groq API Key சரிபார்க்கவும்**:
+   - https://console.groq.com இல் உள்நுழையவும்
+   - API Key வலிதாக உள்ளதா சரிபார்க்கவும்
+   - Key க்கு quota இருக்கிறதா சரிபார்க்கவும்
+
+2. **Gemini API Key வழங்கவும்** (மாற்றுக்கு):
+   - https://ai.google.dev இல் உள்நுழையவும்
+   - பக்க பட்டையில் paste செய்யவும்"""
             
             st.error(error_message)
             
@@ -333,7 +336,7 @@ if user_input:
     
     except Exception as e:
         error_str = str(e)
-        error_message = f"❌ **தொழில்நுட்ப பிழை**: {error_str[:200]}"
+        error_message = f"❌ **தொழில்நுட்ப பிழை**: {error_str[:300]}"
         
         st.error(error_message)
         
