@@ -2,7 +2,6 @@ import streamlit as st
 import google.generativeai as genai
 from datetime import datetime
 from io import StringIO
-import time
 
 # Configure page
 st.set_page_config(
@@ -15,11 +14,11 @@ st.set_page_config(
 # ============================================================================
 # SYSTEM PROMPT - VEDIC & KP ASTROLOGY
 # ============================================================================
-SYSTEM_PROMPT = """நீ 30 வருடங்களுக்கு மேல் அனுபவம் வாய்ந்த, பாரம்பரிய தமிழ் வேதி ஜோதிட (Vedic Astrology) மற்றும் கேபி ஜோதிட (KP Astrology - Krishnamurti Paddhati) மாபெரும் நிபுணர். உன்னிடம் ஜாதகர் தனது முழு ஜாதக விவரங்கள் அடங்கிய கோப்பையும், தற்போதைய கோச்சார (Transit) நேரத்தையும் வழங்கி கேள்வி கேட்கிறார்.
+SYSTEM_PROMPT = """நீ 30 வருடங்களுக்கு மேல் அனுபவம் வாய்ந்த, பாரம்பரிய தமிழ் வேதி ஜோதிட (Vedic Astrology) மற்றும் கேபி ஜோதிட (KP Astrology - Krishnamurti Paddhati) மாபெரும் நிபுணர். உன்னிடம் ஜாதகர் தனது முழு ஜாதக விவரங்கள் அடங்கிய கோப்பையும், தற���போதைய கோச்சார (Transit) நேரத்தையும் வழங்கி கேள்வி கேட்கிறார்.
 
 [விதிமுறைகள் & பலன் சொல்லும் முறை]:
 1. அணுகுமுறை: ஒரு தேர்ந்த தமிழ் ஜோசியர் எப்படி கனிவாகவும், பக்குவமாகவும், அதே சமயம் உண்மையை மறைக்காமல் நேர்மையாகவும் பேசுவாரோ, அதே போன்ற தமிழ் நடையில் பதில் அளிக்க வேண்டும் (உதாரணமாக: "வணக்கம் அன்பரே...", "உங்களுடைய தசா புத்தி அமைப்பின்படி...", "கவலை வேண்டாம்...").
-2. தசா புத்தி ஆய்வு: ஜாதகரின் 5 நிலை தசா புத்திகளை (மகா தசா -> புத்தி -> அந்தரம் -> சூட்சுமம��� -> பிராண தசா) தற்போதைய நேரத்தோடு ஒப்பிட்டு, தற்போதைய பிராண தசா சாதகமாக உள்ளதா என்று பார்க்க வேண்டும். தசா புத்தி மாறும் தேதிகளைக் குறிப்பிட்டு, எப்போது மாற்றம் நடக்கும் என்று துல்லியமாகச்ச் சொல்ல வேண்டும்.
+2. தசா புத்தி ஆய்வு: ஜாதகரின் 5 நிலை தசா புத்திகளை (மகா தசா -> புத்தி -> அந்தரம் -> சூட்சுமம் -> பிராண தசா) தற்போதைய நேரத்தோடு ஒப்பிட்டு, தற்போதைய பிராண தசா சாதகமாக உள்ளதா என்று பார்க்க வேண்டும். தசா புத்தி மாறும் தேதிகளைக் குறிப்பிட்டு, எப்போது மாற்றம் நடக்கும் என்று துல்லியமாகச்ச் சொல்ல வேண்டும்.
 3. வேதிக + கேபி கலவை: 
    - பொதுவான கேள்விகள் மற்றும் தசா பலன்களுக்கு 'வேதி ஜோதிட' முறையையும் (ராசி, லக்னம், கிரக பார்வை, 10-ஆம் அதிபதி நிலை), 
    - துல்லியமான 'ஆம்/இல்லை' மற்றும் 'காரிய சித்தி' போன்ற கேள்விகளுக்கு 'கேபி (KP) ஜோதிட' முறையையும் (பாவ தொடர்புகள், கிரகங்களின் நட்சத்திர நாதன் (Starlord), உப-நட்சத்திர நாதன் (Sublord) தொடர்புகள்) பயன்படுத்த வேண்டும்.
@@ -78,14 +77,14 @@ with st.sidebar:
     st.divider()
     
     # Session info
-    st.subheader("📊 சत்ர தகவல்கள்")
+    st.subheader("📊 சத்ர தகவல்கள்")
     if st.session_state.api_key:
         st.info("✅ API Key: வழங்கப்பட்டுவிட்டது", icon="🔐")
     else:
         st.warning("⚠️ API Key: வழங்க வேண்டியுள்ளது", icon="🔐")
     
     if st.session_state.horoscope_data:
-        st.info(f"✅ ஜாதக ஃபைல்: அப்லோட்டாகியுள்ளது ({len(st.session_state.horoscope_data)} bytes)", icon="📄")
+        st.info(f"✅ ஜாதக ஃபைல்: அப்லோட்டாகியுள்ள��ு ({len(st.session_state.horoscope_data)} bytes)", icon="📄")
     else:
         st.warning("⚠️ ஜாதக ஃபைல்: வழங்க வேண்டியுள்ளது", icon="📄")
     
@@ -189,29 +188,28 @@ if user_input:
         # Add metadata footer
         st.caption(f"🕐 **கோச்சார நேரம்**: {current_time} | 🤖 **Gemini 1.5 Pro**")
     
-    except genai.error.InvalidAPIKeyError:
-        error_message = "❌ **API Key பிழை**: உங்கள் Gemini API Key தவறாகவோ அல்லது முறைசாரா வகையிலோ உள்ளது."
-        st.error(error_message)
-        st.session_state.messages[-1] = {
-            "role": "assistant",
-            "content": error_message
-        }
-    
-    except genai.error.APIError as e:
-        error_message = f"❌ **API பிழை**: {str(e)}"
-        st.error(error_message)
-        st.session_state.messages[-1] = {
-            "role": "assistant",
-            "content": error_message
-        }
-    
     except Exception as e:
-        error_message = f"❌ **பிழை**: {str(e)}"
+        # Generic exception handling for all API errors
+        error_str = str(e)
+        
+        # Check for invalid API key in error message
+        if "API key" in error_str or "authentication" in error_str.lower():
+            error_message = "❌ **API Key பிழை**: உங்கள் Gemini API Key தவறாகவோ அல்லது முறைசாரா வகையிலோ உள்ளது. தயவுசெய்து https://ai.google.dev இலிருந்து சரியான API Key ஐ பெறவும்."
+        elif "quota" in error_str.lower():
+            error_message = "❌ **Quota பிழை**: உங்கள் Gemini API quota முடிந்துவிட்டது. தயவுசெய்து பின்னர் முயற்சி செய்யவும்."
+        elif "429" in error_str:
+            error_message = "⏳ **கோரிக்கை மிக அதிகம்**: சிறிது நேரம் பிறகு மீண்டும் முயற்சி செய்யவும்."
+        else:
+            error_message = f"❌ **பிழை**: {error_str[:200]}"
+        
         st.error(error_message)
-        st.session_state.messages[-1] = {
-            "role": "assistant",
-            "content": error_message
-        }
+        
+        # Only add to messages if it exists
+        if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": error_message
+            })
 
 # ============================================================================
 # FOOTER
@@ -222,7 +220,7 @@ st.markdown("""
 **📌 குறிப்பு**: 
 - இந்த பயன்பாடு 100% பிரவுசர்-அடிப்படையாக இயங்கும். சர்வரில் எந்த தரவும் சேமிக்கப்படாது.
 - பிரவுசர் டேபை க்ளோஸ் செய்தால் அனைத்து உரையாடல்களும் சுத்தமாக அழிந்துவிடும்.
-- தயவுசெய்து **[privacy-first AI](https://ai.google.dev/)** பயன்பாட்டை பயன்படுத்தவும்.
+- தயவுசெய்து **[Google AI Studio](https://ai.google.dev/)** இலிருந்து இலவச Gemini API Key பெறவும்.
 
 **🔮 வாழ்க தமிழ் ஜோதிடம்!**
 """)
