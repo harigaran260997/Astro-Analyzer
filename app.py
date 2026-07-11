@@ -40,7 +40,7 @@ if "gemini_api_key" not in st.session_state:
 if "groq_api_key" not in st.session_state:
     st.session_state.groq_api_key = None
 if "api_provider" not in st.session_state:
-    st.session_state.api_provider = "Groq"  # Default to Groq
+    st.session_state.api_provider = "Groq"
 if "file_uploaded" not in st.session_state:
     st.session_state.file_uploaded = False
 if "model_used" not in st.session_state:
@@ -53,7 +53,7 @@ with st.sidebar:
     st.title("⚙️ கட்டமைப்பு")
     
     # API Provider Selection
-    st.subheader("🔌 API வழங்குநர் தேர்வு")
+    st.subheader("🔌 API வழங்குநர் தே���்வு")
     api_provider = st.radio(
         "எந்த API ஐ பயன்படுத்த வேண்டும்?",
         options=["Groq", "Gemini"],
@@ -64,14 +64,14 @@ with st.sidebar:
     st.divider()
     
     # Groq API Key input
-    if api_provider == "Groq" or True:  # Show both options
-        groq_key_input = st.text_input(
-            "Groq API Key (விரைவான & இலவசம்)",
-            type="password",
-            placeholder="gsk_..."
-        )
-        if groq_key_input:
-            st.session_state.groq_api_key = groq_key_input
+    groq_key_input = st.text_input(
+        "Groq API Key (விரைவான & இலவசம்)",
+        type="password",
+        placeholder="gsk_...",
+        value=st.session_state.groq_api_key or ""
+    )
+    if groq_key_input:
+        st.session_state.groq_api_key = groq_key_input
     
     st.divider()
     
@@ -79,7 +79,8 @@ with st.sidebar:
     gemini_key_input = st.text_input(
         "Gemini API Key (விருப்பம்)",
         type="password",
-        placeholder="AIzaSy..."
+        placeholder="AIzaSy...",
+        value=st.session_state.gemini_api_key or ""
     )
     if gemini_key_input:
         st.session_state.gemini_api_key = gemini_key_input
@@ -116,15 +117,15 @@ with st.sidebar:
     if st.session_state.gemini_api_key:
         st.info("✅ Gemini Key: வழங்கப்பட்டுவிட்டது", icon="🔐")
     else:
-        st.caption("ℹ️ Gemini Key: விருப்பம் (Groq மாற்று)", icon="🔐")
+        st.caption("ℹ️ Gemini Key: விருப்பம்", icon="🔐")
     
     if st.session_state.horoscope_data:
-        st.info(f"✅ ஜாதக ஃபைல்: அப்லோட்டாகியுள்ளது ({len(st.session_state.horoscope_data)} bytes)", icon="📄")
+        st.info(f"✅ ஜாதக ஃபைல்: அப்லோட்டாகியுள்ளது", icon="📄")
     else:
         st.warning("⚠️ ஜாதக ஃபைல்: வழங்க வேண்டியுள்ளது", icon="📄")
     
     if st.session_state.model_used:
-        st.info(f"🤖 பயன்படுத்தப்பட்ட மாதிரி: {st.session_state.model_used}", icon="✨")
+        st.info(f"🤖 பயன்படுத்தப்பட்ட: {st.session_state.model_used}", icon="✨")
     
     st.divider()
     
@@ -144,7 +145,6 @@ st.divider()
 # ============================================================================
 # MAIN CHAT INTERFACE
 # ============================================================================
-# Display existing messages
 chat_container = st.container()
 with chat_container:
     for message in st.session_state.messages:
@@ -158,12 +158,12 @@ has_horoscope = st.session_state.horoscope_data
 if not has_api_key or not has_horoscope:
     if not has_api_key:
         st.info(
-            "🔓 **API Key தேவை**: தயவுசெய்து பக்க பட்டையில் Groq அல்லது Gemini API Key ஐ வழங்கவும்.",
+            "🔓 **API Key தேவை**: Groq அல்லது Gemini API Key ஐ பக்க பட்டையில் வழங்கவும்.",
             icon="ℹ️"
         )
     if not has_horoscope:
         st.info(
-            "📄 **ஜாதக ஃபைல் தேவை**: தயவுசெய்து உங்கள் ஜாதக .txt ஃபைலை அப்லோட் செய்யவும்.",
+            "📄 **ஜாதக ஃபைல் தேவை**: உங்கள் ஜாதக .txt ஃபைலை அப்லோட் செய்யவும்.",
             icon="ℹ️"
         )
 else:
@@ -191,10 +191,8 @@ if user_input:
     
     # Generate AI response
     try:
-        # Get current time with live timestamp
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Prepare the context with horoscope data and transit time
         context = f"""
 [ஜாதக விவரங்கள்]:
 {st.session_state.horoscope_data}
@@ -210,9 +208,12 @@ if user_input:
         
         assistant_response = None
         model_used = None
+        error_log = []
         
-        # Try Groq first if key is available
+        # Try Groq first
         if st.session_state.groq_api_key:
+            st.info("⚡ Groq ஐ முயற்சி செய்கிறது...", icon="⏳")
+            
             try:
                 groq_client = Groq(api_key=st.session_state.groq_api_key)
                 
@@ -224,6 +225,8 @@ if user_input:
                 
                 for groq_model in groq_models:
                     try:
+                        st.info(f"📡 Groq model ஐ முயற்சி செய்கிறது: {groq_model}", icon="⏳")
+                        
                         chat_completion = groq_client.chat.completions.create(
                             messages=[
                                 {
@@ -239,34 +242,29 @@ if user_input:
                             max_tokens=2048,
                             temperature=0.7,
                         )
+                        
                         assistant_response = chat_completion.choices[0].message.content
                         model_used = f"Groq ({groq_model})"
                         st.session_state.model_used = model_used
+                        
+                        st.success(f"✅ {model_used} பயன்படுத்தி பதிலளிக்கப்பட்டது")
                         break
-                    except:
+                        
+                    except Exception as model_error:
+                        error_msg = f"❌ {groq_model}: {str(model_error)[:100]}"
+                        error_log.append(error_msg)
+                        st.warning(error_msg)
                         continue
                 
-                if assistant_response:
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": assistant_response
-                    })
-                    
-                    with chat_container:
-                        with st.chat_message("assistant"):
-                            st.markdown(assistant_response)
-                    
-                    st.caption(f"🕐 **கோச்சார நேரம்**: {current_time} | 🤖 **{model_used}** | ⚡ விரைவு")
             except Exception as groq_error:
-                groq_error_str = str(groq_error)
-                if "API key" in groq_error_str or "authentication" in groq_error_str.lower():
-                    st.warning("⚠️ Groq API Key பிழை - Gemini க்கு மாறுகிறது...")
-                else:
-                    st.warning(f"⚠️ Groq பிழை - Gemini க்கு மாறுகிறது...")
-                assistant_response = None
+                error_msg = f"❌ Groq பிழை: {str(groq_error)[:150]}"
+                error_log.append(error_msg)
+                st.warning(error_msg)
         
         # Fallback to Gemini if Groq failed or not provided
         if not assistant_response and st.session_state.gemini_api_key:
+            st.info("🔐 Gemini ஐ முயற்சி செய்கிறது...", icon="⏳")
+            
             try:
                 genai.configure(api_key=st.session_state.gemini_api_key)
                 
@@ -279,6 +277,8 @@ if user_input:
                 
                 for model_name in models_to_try:
                     try:
+                        st.info(f"📡 Gemini model ஐ முயற்சி செய்கிறது: {model_name}", icon="⏳")
+                        
                         model = genai.GenerativeModel(model_name)
                         
                         response = model.generate_content(
@@ -292,27 +292,38 @@ if user_input:
                         assistant_response = response.text
                         model_used = f"Gemini ({model_name})"
                         st.session_state.model_used = model_used
+                        
+                        st.success(f"✅ {model_used} பயன்படுத்தி பதிலளிக்கப்பட்டது")
                         break
-                    except:
+                        
+                    except Exception as model_error:
+                        error_msg = f"❌ {model_name}: {str(model_error)[:100]}"
+                        error_log.append(error_msg)
+                        st.warning(error_msg)
                         continue
-                
-                if assistant_response:
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": assistant_response
-                    })
-                    
-                    with chat_container:
-                        with st.chat_message("assistant"):
-                            st.markdown(assistant_response)
-                    
-                    st.caption(f"🕐 **கோச்சார நேரம்**: {current_time} | 🤖 **{model_used}**")
+                        
             except Exception as gemini_error:
-                pass
+                error_msg = f"❌ Gemini பிழை: {str(gemini_error)[:150]}"
+                error_log.append(error_msg)
+                st.warning(error_msg)
         
-        # If still no response
-        if not assistant_response:
-            error_message = "❌ **பிழை**: எந்த API யும் பதிலளிக்கவில்லை. தயவுசெய்து: 1) API Keys சரியாக உள்ளதா சரிபார்க்கவும் 2) Groq: https://console.groq.com 3) Gemini: https://ai.google.dev"
+        # If we got a response, display it
+        if assistant_response:
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": assistant_response
+            })
+            
+            with chat_container:
+                with st.chat_message("assistant"):
+                    st.markdown(assistant_response)
+            
+            st.caption(f"🕐 {current_time} | 🤖 {model_used}")
+        
+        # If no response from either API
+        else:
+            error_message = "❌ **பிழை**: எந்த API யும் பதிலளிக்கவில்லை.\n\n**பிழை விவரங்கள்:**\n" + "\n".join(error_log) + "\n\n**தீர்வு:**\n1) API Keys சரியாக உள்ளதா சரிபார்க்கவும்\n2) Groq: https://console.groq.com\n3) Gemini: https://ai.google.dev"
+            
             st.error(error_message)
             
             if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
@@ -323,15 +334,7 @@ if user_input:
     
     except Exception as e:
         error_str = str(e)
-        
-        if "API key" in error_str or "authentication" in error_str.lower():
-            error_message = "❌ **API Key பிழை**: உங்கள் API Key தவறாக உள்ளது. தயவுசெய்து சரியான Key ஐ வழங்கவும்."
-        elif "quota" in error_str.lower() or "rate limit" in error_str.lower():
-            error_message = "⏳ **Quota பிழை**: API வரம்பு அடிக்கப்பட்டுவிட்டது. சிறிது நேரம் பிறகு முயற்சி செய்யவும்."
-        elif "429" in error_str:
-            error_message = "⏳ **கோரிக்கை மிக அதிகம்**: சிறிது நேரம் பிறகு மீண்டும் முயற்சி செய்யவும்."
-        else:
-            error_message = f"❌ **பிழை**: {error_str[:150]}"
+        error_message = f"❌ **தொழில்நுட்ப பிழை**: {error_str[:200]}"
         
         st.error(error_message)
         
